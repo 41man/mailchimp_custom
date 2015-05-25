@@ -1,0 +1,17 @@
+name = MailChimp Custom
+description = Implements MailChimp Ecommerce custom actions
+package = Commerce (contrib)
+dependencies[] = commerce_product
+dependencies[] = commerce_order
+dependencies[] = mailchimp (3.x)
+dependencies[] = mailchimp_lists
+dependencies[] = addressfield_tokens
+configure = admin/commerce/config/mailchimp
+core = 7.x
+
+; Information added by drupal.org packaging script on 2013-09-30
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "mailchimp_custom"
+datestamp = "1380560401"
+

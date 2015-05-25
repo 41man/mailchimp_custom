@@ -1,0 +1,74 @@
+<?php
+  
+  /**
+   * Rules actions
+   **/
+  function mailchimp_custom_rules_action_info(){
+    return array(
+      'mailchimp_custom_mailchimp_date_update' => array(
+        'group' => t('Custom'),
+        'label' => t('Custom mailchimp action'),
+        'parameter' => array(
+          //pass in parameters
+          'user' => array('type' => 'user', 'label' => t('The current logged in user.')),
+        ),
+      ),
+    );
+  }
+  
+  /**
+   * Rules conditions
+   **/
+  function mailchimp_custom_rules_condition_info(){
+    $conditions = array();
+    
+    $conditions['mailchimp_custom_is_user_subscribed_to_mailchimp'] = array(
+      'label' => t('If users email subscribed to mailchimp'),
+      'group' => t('Custom'),
+      'parameter' => array(
+        'user' => array(
+          'type' => 'user',
+          'label' => t('Current user'),
+        ),
+      ),
+    );
+    
+    return $conditions;
+  }
+  
+  /**
+   * Is current user's email subscribed to mailchimp
+   **/
+  function mailchimp_custom_is_user_subscribed_to_mailchimp($user){
+    $lists = mailchimp_get_lists(array(), FALSE);
+    foreach($lists as $list_id => $list){
+      $result = mailchimp_is_subscribed($list_id, $user->mail);
+      if($result){
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  /**
+   * Update merge var Date
+   **/
+  function mailchimp_custom_mailchimp_date_update($user) {
+    $lists = mailchimp_get_lists(array(), FALSE);
+    foreach($lists as $list_id => $list){
+      $member = mailchimp_get_memberinfo($list_id, $user->mail);
+      if(!empty($member)){
+        //drupal_set_message('<pre>'. print_r($member, true) .'</pre>');
+        $mapi = mailchimp_get_api_object();
+        $merge_vars = $member['merges'];
+        if(!isset($merge_vars['CURDATE'])){
+          $mapi->lists->mergeVarAdd($list_id, "CURDATE", "Date");
+        }
+        $merge_vars['CURDATE'] = date("d-m-Y");
+        //$return = mailchimp_update_member($list_id, $user->mail, $merge_vars);
+        mailchimp_update_member_process($list_id, $user->mail, $merge_vars, "text", true);
+      }
+    }
+  }
+  
+  
